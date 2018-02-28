@@ -10,7 +10,9 @@ namespace MileStoneClient
     {
         static void Main(string[] args)
         {
-            //  TODO
+            CommunicationLayer.Communication con = new CommunicationLayer.Communication();
+            Console.WriteLine( CommunicationLayer.Communication.Send("localhost", new CommunicationLayer.Message()));
+            Console.ReadKey();
         }
     }
 }

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace MileStoneClient.CommunicationLayer
 {
-    class Message
+    public class Message
     {
         private Guid _id;
         private string _userName;
         private DateTime _date;
         private string _messageContent;
+        private string _groupId;
 
         public Guid Id
         {
@@ -65,12 +66,26 @@ namespace MileStoneClient.CommunicationLayer
             }
         }
 
-        public Message(Guid id, string userName, DateTime date, string messageContent)
+        public string GroupID
+        {
+            get
+            {
+                return _groupId;
+            }
+
+            set
+            {
+                _groupId = value;
+            }
+        }
+
+        public Message(Guid id=new Guid(), string userName ="", DateTime date= new DateTime(), string messageContent ="",string groupId ="")
         {
             this._id = id;
             this._userName = userName;
             this._date = date;
             this._messageContent = messageContent;
+            this._groupId = groupId;
         }
 
          

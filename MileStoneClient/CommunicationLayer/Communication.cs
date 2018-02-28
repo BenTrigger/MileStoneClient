@@ -2,81 +2,100 @@
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace MileStoneClient.CommunicationLayer
 {
 
 
-    public class communication
+    public class Communication
     {
-
-        public class SimpleHTTPClient
+        private class Request
         {
-            /// <summary>
-            /// Send an object of type T1, @item, parsed as json string embedded with the 
-            /// authentication token, that is build using @user and @token, 
-            /// as an HTTP post request to server at address @url.
-            /// This method parse the reserver response using JSON to object of type T2.
-            /// </summary>
-            /// <typeparam name="T1">Type of the data object to send and receive</typeparam>
-            /// <param name="url">address of the server</param>
-            /// <param name="reqType">request type</param>
-            /// <param name="newMsg">the data to send in the reuqest</param>
-            /// <returns>the server response parsed as T1 object in json format</returns>
-            public T1 SendPostRequest<T1>(string url,string reqType, T1 newMsg) : class
+
+            public Message _msg;
+            public string _msgType;
+
+            public Request(Message _msg, string _msgType)
             {
-                var response = SendPostRequest(url, reqType, newMsg);
-                if(response != null )
-                {
-                    if( 
-                }
-                return response == null ? null : FromJson<T1>(response);
+                this._msg = _msg;
+                this._msgType = _msgType;
             }
 
-            /// <summary>
-            /// Send an object of type T1, @item, parsed as json string embedded with the 
-            /// authentication token, that is build using @user and @token, 
-            /// as an HTTP post request to server at address @url.
-            /// This method reutens the server response as is.
-            /// </summary>
-            /// <typeparam name="T1">Type of the data object to send</typeparam>
-            /// <param name="url">address of the server</param>
-            /// <param name="user">username for authentication data</param>
-            /// <param name="token">token for authentication data</param>
-            /// <param name="item">the data item to send in the reuqest</param>
-            /// <returns>the server response</returns>
-            public string SendPostRequest<T1>(string url, T1 item)
+        }
+
+        public static Guid Send(string url,Message msg)
+        {
+            return SimpleHTTPClient.SendPostRequest(url,new Request(msg,"1"));
+        }
+
+        public static List<Message> GetTenMessages(string url)
+        {
+            List<Message> retVal = SimpleHTTPClient.GetListRequest(url, "2");
+            return retVal;
+        }
+
+        private class SimpleHTTPClient
+        {
+
+            internal static Guid SendPostRequest(string url, Request item)
             {
+                Request response = null;
                 JObject jsonItem = JObject.FromObject(item);
-                //jsonItem.Add("auth", JObject.FromObject(auth));
                 StringContent content = new StringContent(jsonItem.ToString());
                 using (var client = new HttpClient())
                 {
                     var result = client.PostAsync(url, content).Result;
                     var responseContent = result?.Content?.ReadAsStringAsync().Result;
-                    return responseContent;
+                    try
+                    {
+                        response = JsonConvert.DeserializeObject<Request>(responseContent, new JsonSerializerSettings
+                        {
+                            Error = delegate
+                            {
+                                throw new JsonException();
+                            }
+                        });
+                    }
+                    catch
+                    {
+                        throw new Exception();
+                    }
+                      
+                    return response._msg.Id;
                 }
             }
 
-            private static T FromJson<T>(string response) where T : class
+            internal static List<Message> GetListRequest(string url,string messageType)
             {
-                if (response == null)
+                List<Message> res = new List<Message>();
+                JObject jsonItem = new JObject();
+                jsonItem["messageType"] = messageType;
+                StringContent content = new StringContent(jsonItem.ToString());
+                using (var client = new HttpClient())
                 {
-                    return null;
-                }
-                try
-                {
-                    return JsonConvert.DeserializeObject<T>(response, new JsonSerializerSettings
+                    var result = client.PostAsync(url, content).Result;
+                    var responseContent = result?.Content?.ReadAsStringAsync().Result;
+                    
+                    jsonItem = new JObject(responseContent);
+                    for (int i = 0; i < jsonItem.Count; i++)
                     {
-                        Error = delegate {
-                            throw new JsonException(response);
-                        }
-                    });
+                        res.Add(getMessage(jsonItem[i]));
+                    }
+                    return res;
                 }
-                catch
+            }
+
+            private static Message getMessage(JToken jToken)
+            {
+                return new Message
                 {
-                    throw new Exception(response);
-                }
+                    Date = new DateTime(Convert.ToInt64(jToken["dateTime"])),
+                    Id = new Guid(jToken["ID"].ToString()),
+                    UserName = jToken["userName"].ToString(),
+                    MessageContent = jToken["messageContent"].ToString(),
+                    GroupID = jToken["groupID"].ToString()
+                };
             }
         }
     }
