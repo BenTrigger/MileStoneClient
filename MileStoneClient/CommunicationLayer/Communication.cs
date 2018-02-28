@@ -20,11 +20,16 @@ namespace MileStoneClient.CommunicationLayer
             /// </summary>
             /// <typeparam name="T1">Type of the data object to send and receive</typeparam>
             /// <param name="url">address of the server</param>
+            /// <param name="reqType">request type</param>
             /// <param name="newMsg">the data to send in the reuqest</param>
             /// <returns>the server response parsed as T1 object in json format</returns>
-            public T1 SendPostRequest<T1>(string url, T1 newMsg) : class
+            public T1 SendPostRequest<T1>(string url,string reqType, T1 newMsg) : class
             {
-                var response = SendPostRequest(url, newMsg);
+                var response = SendPostRequest(url, reqType, newMsg);
+                if(response != null )
+                {
+                    if( 
+                }
                 return response == null ? null : FromJson<T1>(response);
             }
 
