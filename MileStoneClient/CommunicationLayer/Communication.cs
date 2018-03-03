@@ -3,6 +3,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MileStoneClient.CommunicationLayer
 {
@@ -12,14 +13,21 @@ namespace MileStoneClient.CommunicationLayer
     {
         private class Request
         {
-
-            public Message _msg;
-            public string _msgType;
+            public Guid messageGuid;
+            public string userName;
+            public long msgDate;
+            public string messageContent;
+            public string groupID;
+            public string messageType;
 
             public Request(Message _msg, string _msgType)
             {
-                this._msg = _msg;
-                this._msgType = _msgType;
+                this.messageType = _msgType;
+                this.messageGuid = _msg.Id;
+                this.userName = _msg.UserName;
+                this.msgDate = _msg.Date.Ticks;
+                this.messageContent = _msg.MessageContent;
+                this.groupID = _msg.GroupID;
             }
 
         }
@@ -42,7 +50,7 @@ namespace MileStoneClient.CommunicationLayer
             {
                 Request response = null;
                 JObject jsonItem = JObject.FromObject(item);
-                StringContent content = new StringContent(jsonItem.ToString());
+                StringContent content = new StringContent(jsonItem.ToString()/*,Encoding.UTF8,"application/json"*/);
                 using (var client = new HttpClient())
                 {
                     var result = client.PostAsync(url, content).Result;
@@ -62,7 +70,7 @@ namespace MileStoneClient.CommunicationLayer
                         throw new Exception();
                     }
                       
-                    return response._msg.Id;
+                    return response.messageGuid;
                 }
             }
 
