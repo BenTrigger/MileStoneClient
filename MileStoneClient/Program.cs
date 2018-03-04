@@ -10,9 +10,8 @@ namespace MileStoneClient
     {
         static void Main(string[] args)
         {
-            //CommunicationLayer.Communication con = new CommunicationLayer.Communication("localhost");
-            Console.WriteLine( CommunicationLayer.Communication.Send("http://127.0.0.1:80", new CommunicationLayer.Message()));
-            Console.WriteLine(CommunicationLayer.Communication.GetTenMessages("http://127.0.0.1:80"));
+            Console.WriteLine( CommunicationLayer.Communication.Instance.Send("http://127.0.0.1:80", new CommunicationLayer.CommunicationoMessage()));
+            Console.WriteLine(CommunicationLayer.Communication.Instance.GetTenMessages("http://127.0.0.1:80"));
 
             Console.ReadKey();
         }

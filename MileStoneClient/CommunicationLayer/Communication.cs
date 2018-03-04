@@ -8,9 +8,38 @@ using System.Text;
 namespace MileStoneClient.CommunicationLayer
 {
 
+    public sealed class Communication // singleTon
+    { //sealed modifier prevents other classes from inheriting from it
+        private static Communication instance = null;
+        private static readonly object padlock = new object();
 
-    public class Communication
-    {
+        //private constructor for singleton
+        private Communication()
+        {
+
+        }
+
+        public static Communication Instance
+        {
+            get
+            {   //only if there is no instance lock object, otherwise return instance
+                if (instance == null)
+                {
+                    lock (padlock) // senario: n threads in here,
+                    {              //locking the first and others going to sleep till the first get new Instance
+                        if (instance == null)  // rest n-1 threads no need new instance because its not null anymore.
+                        {
+                            instance = new Communication();
+                        }
+                    }
+                }
+                return instance;
+            }
+        }
+
+        /// <summary>
+        /// inner class that represent the request object from server
+        /// </summary>
         private class Request
         {
             public Guid messageGuid;
@@ -20,7 +49,7 @@ namespace MileStoneClient.CommunicationLayer
             public string groupID;
             public string messageType;
 
-            public Request(Message _msg, string _msgType)
+            public Request(CommunicationoMessage _msg, string _msgType)
             {
                 this.messageType = _msgType;
                 this.messageGuid = _msg.Id;
@@ -32,17 +61,29 @@ namespace MileStoneClient.CommunicationLayer
 
         }
 
-        public static Guid Send(string url,Message msg)
+        /// <summary>
+        /// Send method: send request to server with HttpClient and returned updated guid of currect message
+        /// </summary>
+        /// <param name="url">url of the server</param>
+        /// <param name="msg">CommunicationoMessage message content</param>
+        /// <returns>Guid from server back to client.</returns>
+        public Guid Send(string url, CommunicationoMessage msg)
         {
             return SimpleHTTPClient.SendPostRequest(url,new Request(msg,"1"));
         }
 
-        public static List<Message> GetTenMessages(string url)
+        /// <summary>
+        /// GetTenMessages method: send request to server with HttpClient and returned list of last ten messages
+        /// </summary>
+        /// <param name="url">url of the server</param>
+        /// <returns>List of last ten CommunicationoMessage</returns>
+        public List<CommunicationoMessage> GetTenMessages(string url)
         {
-            List<Message> retVal = SimpleHTTPClient.GetListRequest(url, "2");
+            List<CommunicationoMessage> retVal = SimpleHTTPClient.GetListRequest(url, "2");
             return retVal;
         }
 
+        //inner class that represent the Http Client request/response
         private class SimpleHTTPClient
         {
 
@@ -74,9 +115,9 @@ namespace MileStoneClient.CommunicationLayer
                 }
             }
 
-            internal static List<Message> GetListRequest(string url,string messageType)
+            internal static List<CommunicationoMessage> GetListRequest(string url,string messageType)
             {
-                List<Message> res = new List<Message>();
+                List<CommunicationoMessage> res = new List<CommunicationoMessage>();
                 JObject jsonItem = new JObject();
                 jsonItem["messageType"] = messageType;
                 StringContent content = new StringContent(jsonItem.ToString());
@@ -94,9 +135,9 @@ namespace MileStoneClient.CommunicationLayer
                 }
             }
 
-            private static Message getMessage(JToken jToken)
+            private static CommunicationoMessage getMessage(JToken jToken)
             {
-                return new Message
+                return new CommunicationoMessage
                 {
                     Date = new DateTime(Convert.ToInt64(jToken["msgDate"])),
                     Id = new Guid(jToken["messageGuid"].ToString()),
