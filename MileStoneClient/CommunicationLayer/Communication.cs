@@ -98,12 +98,12 @@ namespace MileStoneClient.CommunicationLayer
             {
                 return new Message
                 {
-                    Date = new DateTime(Convert.ToInt64(jToken["dateTime"])),
-                    Id = new Guid(jToken["ID"].ToString()),
+                    Date = new DateTime(Convert.ToInt64(jToken["msgDate"])),
+                    Id = new Guid(jToken["messageGuid"].ToString()),
                     UserName = jToken["userName"].ToString(),
                     MessageContent = jToken["messageContent"].ToString(),
                     GroupID = jToken["groupID"].ToString()
-                };
+            };
             }
         }
     }
