@@ -69,7 +69,7 @@ namespace MileStoneClient.CommunicationLayer
         /// <returns>Guid from server back to client.</returns>
         public CommunicationoMessage Send(string url, CommunicationoMessage msg)
         {
-            return SimpleHTTPClient.SendPostRequest(url,new Request(msg,"1"));
+            return SimpleHTTPClient.SendPostRequest(url, new Request(msg, "1"));
         }
 
         /// <summary>
@@ -95,11 +95,11 @@ namespace MileStoneClient.CommunicationLayer
                 {
                     var result = client.PostAsync(url, content).Result;
                     var responseContent = result?.Content?.ReadAsStringAsync().Result;
-                    return getMessage(JObject.Parse(responseContent));                   
-                }             
+                    return getMessage(JObject.Parse(responseContent));
+                }
             }
 
-            internal static List<CommunicationoMessage> GetListRequest(string url,string messageType)
+            internal static List<CommunicationoMessage> GetListRequest(string url, string messageType)
             {
                 List<CommunicationoMessage> res = new List<CommunicationoMessage>();
                 JObject jsonItem = new JObject();
@@ -131,7 +131,7 @@ namespace MileStoneClient.CommunicationLayer
                 );
             }
 
-                    
+
         }
     }
 }

@@ -79,7 +79,7 @@ namespace MileStoneClient.CommunicationLayer
             }
         }
 
-        public CommunicationoMessage(Guid id=new Guid(), string userName ="",long utcTime = 0, string messageContent = "", string groupId = "")
+        public CommunicationoMessage(Guid id = new Guid(), string userName = "", long utcTime = 0, string messageContent = "", string groupId = "")
         {
             this._id = id;
             this._userName = userName;
@@ -94,8 +94,8 @@ namespace MileStoneClient.CommunicationLayer
                 "UserName:{1}\n" +
                 "DateTime:{2}\n" +
                 "MessageContect:{3}\n" +
-                "GroupId:{4}\n" 
-                , Id,UserName,Date.ToShortDateString(),MessageContent,GroupID);
+                "GroupId:{4}\n"
+                , Id, UserName, Date.ToShortDateString(), MessageContent, GroupID);
         }
 
         private static DateTime TimeFromUnixTimestamp(long unixTimestamp)
