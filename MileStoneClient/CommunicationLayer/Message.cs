@@ -79,15 +79,33 @@ namespace MileStoneClient.CommunicationLayer
             }
         }
 
-        public CommunicationoMessage(Guid id=new Guid(), string userName ="", DateTime date= new DateTime(), string messageContent ="",string groupId ="")
+        public CommunicationoMessage(Guid id=new Guid(), string userName ="",long utcTime = 0, string messageContent = "", string groupId = "")
         {
             this._id = id;
             this._userName = userName;
-            this._date = date;
+            this._date = TimeFromUnixTimestamp(utcTime);
             this._messageContent = messageContent;
             this._groupId = groupId;
         }
 
-         
+        public override string ToString()
+        {
+            return String.Format("Message ID:{0}\n" +
+                "UserName:{1}\n" +
+                "DateTime:{2}\n" +
+                "MessageContect:{3}\n" +
+                "GroupId:{4}\n" 
+                , Id,UserName,Date.ToShortDateString(),MessageContent,GroupID);
+        }
+
+        private static DateTime TimeFromUnixTimestamp(long unixTimestamp)
+        {
+            unixTimestamp /= 1000;
+            DateTime unixYear0 = new DateTime(1970, 1, 1);
+            long unixTimeStampInTicks = unixTimestamp * TimeSpan.TicksPerSecond;
+            DateTime dtUnix = new DateTime(unixYear0.Ticks + unixTimeStampInTicks);
+            return dtUnix;
+        }
+
     }
 }

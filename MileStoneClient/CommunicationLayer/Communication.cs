@@ -67,7 +67,7 @@ namespace MileStoneClient.CommunicationLayer
         /// <param name="url">url of the server</param>
         /// <param name="msg">CommunicationoMessage message content</param>
         /// <returns>Guid from server back to client.</returns>
-        public Guid Send(string url, CommunicationoMessage msg)
+        public CommunicationoMessage Send(string url, CommunicationoMessage msg)
         {
             return SimpleHTTPClient.SendPostRequest(url,new Request(msg,"1"));
         }
@@ -87,49 +87,34 @@ namespace MileStoneClient.CommunicationLayer
         private class SimpleHTTPClient
         {
 
-            internal static Guid SendPostRequest(string url, Request item)
+            internal static CommunicationoMessage SendPostRequest(string url, Request item)
             {
-                Request response = null;
                 JObject jsonItem = JObject.FromObject(item);
-                StringContent content = new StringContent(jsonItem.ToString()/*,Encoding.UTF8,"application/json"*/);
+                StringContent content = new StringContent(jsonItem.ToString());
                 using (var client = new HttpClient())
                 {
                     var result = client.PostAsync(url, content).Result;
                     var responseContent = result?.Content?.ReadAsStringAsync().Result;
-                    try
-                    {
-                        response = JsonConvert.DeserializeObject<Request>(responseContent, new JsonSerializerSettings
-                        {
-                            Error = delegate
-                            {
-                                throw new JsonException();
-                            }
-                        });
-                    }
-                    catch
-                    {
-                        throw new Exception();
-                    }
-                      
-                    return response.messageGuid;
-                }
+                    return getMessage(JObject.Parse(responseContent));                   
+                }             
             }
 
             internal static List<CommunicationoMessage> GetListRequest(string url,string messageType)
             {
                 List<CommunicationoMessage> res = new List<CommunicationoMessage>();
                 JObject jsonItem = new JObject();
+                JArray jsonArr = new JArray();
                 jsonItem["messageType"] = messageType;
                 StringContent content = new StringContent(jsonItem.ToString());
                 using (var client = new HttpClient())
                 {
                     var result = client.PostAsync(url, content).Result;
                     var responseContent = result?.Content?.ReadAsStringAsync().Result;
-                    
-                    jsonItem = new JObject(responseContent);
-                    for (int i = 0; i < jsonItem.Count; i++)
+
+                    jsonArr = JArray.Parse(responseContent);
+                    for (int i = 0; i < jsonArr.Count; i++)
                     {
-                        res.Add(getMessage(jsonItem[i]));
+                        res.Add(getMessage(jsonArr[i]));
                     }
                     return res;
                 }
@@ -137,15 +122,16 @@ namespace MileStoneClient.CommunicationLayer
 
             private static CommunicationoMessage getMessage(JToken jToken)
             {
-                return new CommunicationoMessage
-                {
-                    Date = new DateTime(Convert.ToInt64(jToken["msgDate"])),
-                    Id = new Guid(jToken["messageGuid"].ToString()),
-                    UserName = jToken["userName"].ToString(),
-                    MessageContent = jToken["messageContent"].ToString(),
-                    GroupID = jToken["groupID"].ToString()
-            };
+                return new CommunicationoMessage(
+                    new Guid(jToken["messageGuid"].ToString()),
+                    jToken["userName"].ToString(),
+                    Convert.ToInt64(jToken["msgDate"]),
+                    jToken["messageContent"].ToString(),
+                    jToken["groupID"].ToString()
+                );
             }
+
+                    
         }
     }
 }
