@@ -49,7 +49,7 @@ namespace MileStoneClient.CommunicationLayer
             public string groupID;
             public string messageType;
 
-            public Request(CommunicationoMessage _msg, string _msgType)
+            public Request(CommunicationMessage _msg, string _msgType)
             {
                 this.messageType = _msgType;
                 this.messageGuid = _msg.Id;
@@ -65,9 +65,9 @@ namespace MileStoneClient.CommunicationLayer
         /// Send method: send request to server with HttpClient and returned updated guid of currect message
         /// </summary>
         /// <param name="url">url of the server</param>
-        /// <param name="msg">CommunicationoMessage message content</param>
+        /// <param name="msg">CommunicationMessage message content</param>
         /// <returns>Guid from server back to client.</returns>
-        public CommunicationoMessage Send(string url, CommunicationoMessage msg)
+        public CommunicationMessage Send(string url, CommunicationMessage msg)
         {
             return SimpleHTTPClient.SendPostRequest(url, new Request(msg, "1"));
         }
@@ -76,10 +76,10 @@ namespace MileStoneClient.CommunicationLayer
         /// GetTenMessages method: send request to server with HttpClient and returned list of last ten messages
         /// </summary>
         /// <param name="url">url of the server</param>
-        /// <returns>List of last ten CommunicationoMessage</returns>
-        public List<CommunicationoMessage> GetTenMessages(string url)
+        /// <returns>List of last ten CommunicationMessage</returns>
+        public List<CommunicationMessage> GetTenMessages(string url)
         {
-            List<CommunicationoMessage> retVal = SimpleHTTPClient.GetListRequest(url, "2");
+            List<CommunicationMessage> retVal = SimpleHTTPClient.GetListRequest(url, "2");
             return retVal;
         }
 
@@ -87,7 +87,7 @@ namespace MileStoneClient.CommunicationLayer
         private class SimpleHTTPClient
         {
 
-            internal static CommunicationoMessage SendPostRequest(string url, Request item)
+            internal static CommunicationMessage SendPostRequest(string url, Request item)
             {
                 JObject jsonItem = JObject.FromObject(item);
                 StringContent content = new StringContent(jsonItem.ToString());
@@ -99,9 +99,9 @@ namespace MileStoneClient.CommunicationLayer
                 }
             }
 
-            internal static List<CommunicationoMessage> GetListRequest(string url, string messageType)
+            internal static List<CommunicationMessage> GetListRequest(string url, string messageType)
             {
-                List<CommunicationoMessage> res = new List<CommunicationoMessage>();
+                List<CommunicationMessage> res = new List<CommunicationMessage>();
                 JObject jsonItem = new JObject();
                 JArray jsonArr = new JArray();
                 jsonItem["messageType"] = messageType;
@@ -120,9 +120,9 @@ namespace MileStoneClient.CommunicationLayer
                 }
             }
 
-            private static CommunicationoMessage getMessage(JToken jToken)
+            private static CommunicationMessage getMessage(JToken jToken)
             {
-                return new CommunicationoMessage(
+                return new CommunicationMessage(
                     new Guid(jToken["messageGuid"].ToString()),
                     jToken["userName"].ToString(),
                     Convert.ToInt64(jToken["msgDate"]),

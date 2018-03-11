@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MileStoneClient.CommunicationLayer
 {
-    public sealed class CommunicationoMessage
+    public sealed class CommunicationMessage
     {
         private Guid _id;
         private string _userName;
@@ -79,7 +79,7 @@ namespace MileStoneClient.CommunicationLayer
             }
         }
 
-        public CommunicationoMessage(Guid id = new Guid(), string userName = "", long utcTime = 0, string messageContent = "", string groupId = "")
+        public CommunicationMessage(Guid id = new Guid(), string userName = "", long utcTime = 0, string messageContent = "", string groupId = "")
         {
             this._id = id;
             this._userName = userName;
