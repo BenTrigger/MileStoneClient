@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommunicationLayer\Communication.cs" />
-    <Compile Include="CommunicationLayer\Message.cs" />
+    <Compile Include="CommunicationLayer\IMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -10,6 +10,8 @@ namespace MileStoneClient.CommunicationLayer
 
     public sealed class Communication // singleTon
     { //sealed modifier prevents other classes from inheriting from it
+
+        #region Implement Singleton Design
         private static Communication instance = null;
         private static readonly object padlock = new object();
 
@@ -37,39 +39,19 @@ namespace MileStoneClient.CommunicationLayer
             }
         }
 
-        /// <summary>
-        /// inner class that represent the request object from server
-        /// </summary>
-        private class Request
-        {
-            public Guid messageGuid;
-            public string userName;
-            public long msgDate;
-            public string messageContent;
-            public string groupID;
-            public string messageType;
 
-            public Request(CommunicationMessage _msg, string _msgType)
-            {
-                this.messageType = _msgType;
-                this.messageGuid = _msg.Id;
-                this.userName = _msg.UserName;
-                this.msgDate = _msg.Date.Ticks;
-                this.messageContent = _msg.MessageContent;
-                this.groupID = _msg.GroupID;
-            }
+        #endregion
 
-        }
-
+        #region API for Users
         /// <summary>
         /// Send method: send request to server with HttpClient and returned updated guid of currect message
         /// </summary>
         /// <param name="url">url of the server</param>
         /// <param name="msg">CommunicationMessage message content</param>
         /// <returns>Guid from server back to client.</returns>
-        public CommunicationMessage Send(string url, CommunicationMessage msg)
+        public IMessage Send(string url, string gourpID, string nickName, string messageContent)
         {
-            return SimpleHTTPClient.SendPostRequest(url, new Request(msg, "1"));
+            return SimpleHTTPClient.SendPostRequest(url, new Request(new Guid(), gourpID, nickName, messageContent, 0, "1"));
         }
 
         /// <summary>
@@ -77,12 +59,14 @@ namespace MileStoneClient.CommunicationLayer
         /// </summary>
         /// <param name="url">url of the server</param>
         /// <returns>List of last ten CommunicationMessage</returns>
-        public List<CommunicationMessage> GetTenMessages(string url)
+        public List<IMessage> GetTenMessages(string url)
         {
-            List<CommunicationMessage> retVal = SimpleHTTPClient.GetListRequest(url, "2");
+            List<IMessage> retVal = SimpleHTTPClient.GetListRequest(url, "2");
             return retVal;
         }
+        #endregion
 
+        #region HttpRequest
         //inner class that represent the Http Client request/response
         private class SimpleHTTPClient
         {
@@ -99,9 +83,9 @@ namespace MileStoneClient.CommunicationLayer
                 }
             }
 
-            internal static List<CommunicationMessage> GetListRequest(string url, string messageType)
+            internal static List<IMessage> GetListRequest(string url, string messageType)
             {
-                List<CommunicationMessage> res = new List<CommunicationMessage>();
+                List<IMessage> res = new List<IMessage>();
                 JObject jsonItem = new JObject();
                 JArray jsonArr = new JArray();
                 jsonItem["messageType"] = messageType;
@@ -124,14 +108,82 @@ namespace MileStoneClient.CommunicationLayer
             {
                 return new CommunicationMessage(
                     new Guid(jToken["messageGuid"].ToString()),
+                    jToken["groupID"].ToString(),
                     jToken["userName"].ToString(),
-                    Convert.ToInt64(jToken["msgDate"]),
                     jToken["messageContent"].ToString(),
-                    jToken["groupID"].ToString()
+                    Convert.ToInt64(jToken["msgDate"])    
                 );
             }
+            
+        }
+        #endregion
 
+        #region Private Class 
+
+        /// <summary>
+        /// class that represent the Message without anyrequest
+        /// </summary>
+        private sealed class CommunicationMessage : IMessage
+        {
+            public Guid Id { get; }
+            public string UserName { get; }
+            public DateTime Date { get; }
+            public string MessageContent { get; }
+            public string GroupID { get; }
+            public CommunicationMessage(Guid id = new Guid(), string groupId = "", string userName = "", string messageContent = "", long utcTime = 0)
+            {
+                this.Id = id;
+                this.UserName = userName;
+                this.Date = TimeFromUnixTimestamp(utcTime);
+                this.MessageContent = messageContent;
+                this.GroupID = groupId;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("Message ID:{0}\n" +
+                    "UserName:{1}\n" +
+                    "DateTime:{2}\n" +
+                    "MessageContect:{3}\n" +
+                    "GroupId:{4}\n"
+                    , Id, UserName, Date.ToShortDateString(), MessageContent, GroupID);
+            }
+
+            private static DateTime TimeFromUnixTimestamp(long unixTimestamp)
+            {
+                unixTimestamp /= 1000;
+                DateTime unixYear0 = new DateTime(1970, 1, 1);
+                long unixTimeStampInTicks = unixTimestamp * TimeSpan.TicksPerSecond;
+                DateTime dtUnix = new DateTime(unixYear0.Ticks + unixTimeStampInTicks);
+                return dtUnix;
+            }
 
         }
+
+        /// <summary>
+        /// inner class that represent the request object from server
+        /// </summary>
+        private class Request
+        {
+            public Guid messageGuid;
+            public string userName;
+            public long msgDate;
+            public string messageContent;
+            public string groupID;
+            public string messageType;
+
+            public Request(Guid messageGuid, string groupID, string nickName, string messageContent, long msgDate, string messageType)
+            {
+                this.messageType = messageType;
+                this.messageGuid = messageGuid;
+                this.userName = nickName;
+                this.msgDate = msgDate;
+                this.messageContent = messageContent;
+                this.groupID = groupID;
+            }
+
+        }
+
+        #endregion
     }
 }

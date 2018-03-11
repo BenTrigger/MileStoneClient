@@ -1,23 +1,34 @@
-﻿using MileStoneClient.CommunicationLayer;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using MileStoneClient.CommunicationLayer;
 
 namespace MileStoneClient
 {
     class Program
     {
+
         static void Main(string[] args)
         {
-            //example how to use unixTime and Ticks(DateTime)
-            int timeUtc = (int)new DateTime(2005, 12, 1).ToFileTimeUtc();
+            string gourpID = "2";
+            string nickName = "Ben";
+            string messageContent = "BenRh safd";           
+            string url = "http://127.0.0.1:80";  // url: ip + port
 
-            //Create your own Message and copy to CommunicationMessage
-            CommunicationMessage msg = new CommunicationMessage(new Guid(), "Ben", timeUtc, "BenRh safd", "2");
-            msg = Communication.Instance.Send("http://127.0.0.1:5452", msg);
-            Console.WriteLine(msg); // same as Console.WriteLine(msg.ToString()); Override ToString 
-            List<CommunicationMessage> msgList = Communication.Instance.GetTenMessages("http://127.0.0.1:5452");
+
+            IMessage msg = Communication.Instance.Send(url, gourpID, nickName, messageContent);
+
+            // return with updated time and guid
+            Console.WriteLine("MessageTime:{0} , Guid:{1}\n", msg.Date.ToShortDateString(), msg.Id);
+
+            Console.WriteLine(msg+"\n");
+            //Cannot create instance of CommunicationMessage
+            //IMessage msg2 = new CommunicationMessage(); Error
+
+            
+
+            List<IMessage> msgList = Communication.Instance.GetTenMessages(url);
             Console.WriteLine("Reuest 10 Last Messages:");
-            foreach (CommunicationMessage msgItem in msgList)
+            foreach (IMessage msgItem in msgList)
             {
                 Console.WriteLine(msgItem);
                 Console.WriteLine("");
