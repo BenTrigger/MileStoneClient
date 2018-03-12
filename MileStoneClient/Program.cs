@@ -11,14 +11,14 @@ namespace MileStoneClient
         {
             string gourpID = "2";
             string nickName = "Ben";
-            string messageContent = "BenRh safd";           
-            string url = "http://127.0.0.1:80";  // url: ip + port
+            string messageContent = "BenRh safd";
+            string url = "http://ise172.ise.bgu.ac.il";  // url: ip + port
 
 
             IMessage msg = Communication.Instance.Send(url, gourpID, nickName, messageContent);
 
             // return with updated time and guid
-            Console.WriteLine("MessageTime:{0} , Guid:{1}\n", msg.Date.ToShortDateString(), msg.Id);
+            Console.WriteLine("MessageTime:{0} , Guid:{1}\n", msg.Date.ToString(), msg.Id);
 
             Console.WriteLine(msg+"\n");
             //Cannot create instance of CommunicationMessage

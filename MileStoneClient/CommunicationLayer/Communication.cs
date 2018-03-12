@@ -146,7 +146,7 @@ namespace MileStoneClient.CommunicationLayer
                     "DateTime:{2}\n" +
                     "MessageContect:{3}\n" +
                     "GroupId:{4}\n"
-                    , Id, UserName, Date.ToShortDateString(), MessageContent, GroupID);
+                    , Id, UserName, Date.ToString(), MessageContent, GroupID);
             }
 
             private static DateTime TimeFromUnixTimestamp(long unixTimestamp)
